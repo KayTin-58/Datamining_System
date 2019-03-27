@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="http://cdn.bootcss.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+    <script src="http://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+    <script src="http://cdn.bootcss.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="/js/ajaxfileupload.js"></script>
+    <title>导入数据</title>
+</head>
+<body>
+
+<a href="JavaScript:downloadFile('下载')">下载</a>
+
+</body>
+<script>
+    function downloadFile(fileName){
+        if(fileName){
+            var form=$("<form>");//定义一个form表单
+            form.attr("style","display:none");
+            form.attr("target","");
+            form.attr("method","post");
+            form.attr("action","/fileController/file_save");
+            var fileInput=$("<input>");
+            fileInput.attr("type","hidden");
+            fileInput.attr("id","fileName");//设置属性的名字
+            fileInput.attr("name","fileName");//设置属性的名字
+            fileInput.attr("value",fileName);//设置属性的值
+            $("body").append(form);//将表单放置在web中
+            form.append(fileInput);
+            form.submit();//表单提交
+            //form.remove();
+        }
+    }
+</script>
+</html>

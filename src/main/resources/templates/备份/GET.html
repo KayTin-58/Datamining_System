@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <script src="http://cdn.static.runoob.com/libs/jquery/1.10.2/jquery.min.js"></script>
+    <title>获取数据</title>
+</head>
+<body>
+<button id="bu" value="get"/>
+</body>
+<script>
+    $("#bu").click(function(){
+        $.get("/test01/get",function(data,status){
+            alert("数据: " + data + "\n状态: " + status);
+        });
+    });
+
+</script>
+</html>

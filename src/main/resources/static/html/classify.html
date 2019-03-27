@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="http://cdn.bootcss.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+    <script src="http://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+    <script src="http://cdn.bootcss.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="/js/ajaxfileupload.js"></script>
+    <script src="/js/my_download.js"></script>
+    <style>
+        #test,#test1{min-height:250px;overflow-y:auto;max-height:300px;}
+        #main-nav {
+            margin-left: 1px;
+        }
+        #main-nav.nav-tabs.nav-stacked > li > a {
+            padding: 10px 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #4A515B;
+            background: #E9E9E9;
+            background: -moz-linear-gradient(top, #FAFAFA 0%, #E9E9E9 100%);
+            background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#FAFAFA), color-stop(100%,#E9E9E9));
+            background: -webkit-linear-gradient(top, #FAFAFA 0%,#E9E9E9 100%);
+            background: -o-linear-gradient(top, #FAFAFA 0%,#E9E9E9 100%);
+            background: -ms-linear-gradient(top, #FAFAFA 0%,#E9E9E9 100%);
+            background: linear-gradient(top, #FAFAFA 0%,#E9E9E9 100%);
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FAFAFA', endColorstr='#E9E9E9');
+            -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#FAFAFA', endColorstr='#E9E9E9')";
+            border: 1px solid #D5D5D5;
+            border-radius: 4px;
+        }
+        #main-nav.nav-tabs.nav-stacked > li > a > span {
+            color: #4A515B;
+        }
+        #main-nav.nav-tabs.nav-stacked > li.active > a, #main-nav.nav-tabs.nav-stacked > li > a:hover {
+            color: #FFF;
+            background: #3C4049;
+            background: -moz-linear-gradient(top, #4A515B 0%, #3C4049 100%);
+            background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#4A515B), color-stop(100%,#3C4049));
+            background: -webkit-linear-gradient(top, #4A515B 0%,#3C4049 100%);
+            background: -o-linear-gradient(top, #4A515B 0%,#3C4049 100%);
+            background: -ms-linear-gradient(top, #4A515B 0%,#3C4049 100%);
+            background: linear-gradient(top, #4A515B 0%,#3C4049 100%);
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#4A515B', endColorstr='#3C4049');
+            -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#4A515B', endColorstr='#3C4049')";
+            border-color: #2B2E33;
+        }
+        #main-nav.nav-tabs.nav-stacked > li.active > a, #main-nav.nav-tabs.nav-stacked > li > a:hover > span {
+            color: #FFF;
+        }
+        #main-nav.nav-tabs.nav-stacked > li {
+            margin-bottom: 4px;
+        }
+        /*定义二级菜单样式*/
+        .secondmenu a {
+            font-size: 10px;
+            color: #4A515B;
+            text-align: center;
+        }
+        .navbar-static-top {
+            background-color: #212121;
+            margin-bottom: 5px;
+        }
+        .navbar-brand {
+            background: url('') no-repeat 10px 8px;
+            display: inline-block;
+            vertical-align: middle;
+            padding-left: 50px;
+            color: #fff;
+        }
+        #right{min-height:385px;min-width:650px;overflow-y:auto;overflow-x:auto;max-height:385px;max-width:700px;}
+    </style>
+    <title>导入数据</title>
+</head>
+<body>
+<div  id="app" class="container">
+
+    <!--第一行 系统logo-->
+    <div class="row clearfix">
+        <div class="col-md-4 column">
+        </div>
+        <div class="col-md-4 column">
+            <h1>医疗数据挖掘平台</h1>
+        </div>
+        <div class="col-md-4 column">
+        </div>
+    </div>
+    <br/>
+    <div class="row clearfix">
+        <!--左侧菜单-->
+        <div id="tree" class="col-md-2 column">
+            <br> <br>
+            <!--左侧树形菜单-->
+            <ul id="main-nav" class="nav nav-tabs nav-stacked" style="">
+                <li class="active">
+                    <a href="#">
+                        <i class="glyphicon glyphicon-th-large"></i>
+                        首页
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#" @click="input_file()">
+                        <i class="glyphicon glyphicon-credit-card"></i>
+                        导入数据
+                    </a>
+                </li>
+
+                <li >
+                    <a href="#systemSetting" class="nav-header collapsed" data-toggle="collapse">
+                        <i class="glyphicon glyphicon-cog"></i>
+                        数据预处理
+                        <span class="pull-right glyphicon glyphicon-chevron-down"></span>
+                    </a>
+                    <ul id="systemSetting" class="nav nav-list collapse secondmenu" style="height: 0px;">
+                        <li><a href="#" @click="attribute_gen()"><i class="glyphicon glyphicon-user" ></i>属性预处理</a></li>
+                        <li><a href="#" @click="instance_gen()"><i class="glyphicon glyphicon-th-list"></i>实例预处理</a></li>
+                    </ul>
+                </li>
+
+                <li >
+                    <a href="#classify" class="nav-header collapsed" data-toggle="collapse">
+                        <i class="glyphicon glyphicon-cog"></i>
+                        分类分析
+                        <span class="pull-right glyphicon glyphicon-chevron-down"></span>
+                    </a>
+                    <ul id="classify" class="nav nav-list collapse secondmenu" style="height: 0px;">
+                        <li><a href="#" @click="linerRegression_gen()"><i class="glyphicon glyphicon-user" ></i>决策树算法/J48</a></li>
+                        <li><a href="#" @click="randomForest_gen()"><i class="glyphicon glyphicon-th-list"></i>线性回归/M5P</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="./grid.html">
+                        <i class="glyphicon glyphicon-globe"></i>
+                        回归分析
+                    </a>
+                </li>
+                <li>
+                    <a href="./charts.html">
+                        <i class="glyphicon glyphicon-calendar"></i>
+                        关联规则分析
+                    </a>
+                </li>
+                <li>
+                    <a  @click="ik_par()">
+                        <i class="glyphicon glyphicon-calendar"></i>
+                        文本分词
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#">
+                        <i class="glyphicon glyphicon-fire"></i>
+                        关于系统
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <!--右侧内容显示模块-->
+        <div class="col-md-10 column">
+            <!--第一行-->
+            <div class="row clearfix">
+                <label style="color: #94170d"><h5><a href="#">J48分类算法使用说明</a></h5></label>
+            </div>
+            <!--第er行-->
+            <div class="row clearfix">
+                <div class="col-md-1 column">
+                </div>
+                <div class="col-md-2 column">
+                    <button type="button" class="btn btn-info" @click="dataChart()">查看数据</button>
+                </div>
+                <div class="col-md-1 column">
+                </div>
+                <div class="col-md-2 column">
+                    <button type="button" class="btn btn-info" data-toggle="modal" data-target="#myModal">设置参数</button>
+                    <!-- 模态框（Modal） -->
+                    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                                        &times;
+                                    </button>
+                                    <h4 class="modal-title" id="myModalLabel">
+                                        J48参数配置
+                                    </h4>
+                                </div>
+                                <div class="modal-body">
+                                   <table>
+                                       <tr>
+                                           <td>
+                                               <lable>选择分类属性：</lable>
+                                           </td>
+                                           <td>
+                                               <input type="text" value="" placeholder="last" id="classindex">
+                                           </td>
+
+                                       </tr>
+                                       <tr>
+                                           <td>
+                                               <lable>BatchSize:</lable>
+                                           </td>
+                                           <td>
+                                               <input type="text" value="100" placeholder="默认" id="batchsize">
+                                           </td>
+
+                                       </tr>
+                                       <tr>
+                                           <td>
+                                               <lable>ConfidenceFactor:</lable>
+                                           </td>
+                                           <td>
+                                               <input type="text" value="0.25" placeholder="默认" id="confidencefactor">
+                                           </td>
+
+                                       </tr>
+                                       <tr>
+                                           <td>
+                                               <lable>MinNumObj:</lable>
+                                           </td>
+                                           <td>
+                                               <input type="text" value="2" placeholder="默认" id="minnumobj">
+                                           </td>
+
+                                       </tr>
+                                       <tr>
+                                           <td>
+                                               <lable>NumDecimalPlaces:</lable>
+                                           </td>
+                                           <td>
+                                               <input type="text" value="2" placeholder="默认" id="numdecimalplaces">
+                                           </td>
+
+                                       </tr>
+                                       <tr>
+                                           <td>
+                                               <lable>NumFolds:</lable>
+                                           </td>
+                                           <td>
+                                               <input type="text" value="3" placeholder="默认" id="numfolds">
+                                           </td>
+                                       </tr>
+                                   </table>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-info" data-dismiss="modal" @click="makeSureParams()">
+                                        确定
+                                    </button>
+                                </div>
+                            </div><!-- /.modal-content -->
+                        </div><!-- /.modal -->
+                </div>
+                </div>
+                <div class="col-md-1 column">
+                </div>
+                <div class="col-md-2 column">
+                    <button type="button" class="btn btn-info" >保存数据</button>
+                </div>
+                <div class="col-md-1 column">
+                </div>
+                <div class="col-md-2 column">
+                    <button type="button" class="btn btn-info" id="Details" disabled="true">展示详情</button>
+                </div>
+            </div>
+            <br>
+            <!--第三行-->
+            <div class="row clearfix">
+                <!--左边（选择测试方案）-->
+               <div  class="col-md-4 column" style="background-color: rgba(154, 184, 190, 0.22);border-radius: 5px 0px 0px 5px" >
+                   <br> <br>
+                    <div style="background-color: rgba(179, 193, 221, 0.32);border-radius: 6px 6px 6px 6px">
+                        <label>选择测试方案：</label>
+                        <br>
+                        <label>&nbsp;<input name="test" type="radio" value="1" />&nbsp;&nbsp;选择测试集  <input type="button" value="导入测试文件"></label>
+                        <br>
+                        <label>&nbsp;<input name="test" type="radio" value="2" checked="true"/>&nbsp;&nbsp;交叉验证  <input type="text" id="folds"  placeholder="分段数" style="width: 55px" value="10"></label>
+                    </div>
+                   <br>
+                   <div style="background-color: rgba(205, 206, 212, 0.43);border-radius: 6px 6px 6px 6px">
+                       <label>训练模型：</label>
+                       <br>
+                       <table>
+                           <tr>
+                               <td>
+                                   <button type="button" class="btn btn-info" @click="StartTrain()">开始训练</button>
+                               </td>
+                               <td>
+                                   &nbsp;&nbsp; &nbsp;&nbsp;
+                               </td>
+                               <td>
+                                   <button type="button" class="btn btn-info"  @click="SaveModel()">保存模型</button>
+                               </td>
+                           </tr>
+                       </table>
+                   </div>
+                   <br>
+                   <div style="background-color: rgba(212, 201, 199, 0.44);border-radius: 6px 6px 6px 6px">
+                       <label>预测数据：</label>
+                       <br>
+                       <table>
+                           <tr>
+                               <td>
+                                   <button type="button" class="btn btn-info" data-toggle="modal" data-target="#unknown">导入数据</button>
+                               </td>
+                               <td>
+                                   &nbsp;&nbsp; &nbsp;&nbsp;
+                               </td>
+                               <td>
+                                   <button type="button" class="btn btn-warning" @click="Import_model()">导入模型</button>
+                               </td>
+                               <td>
+                                   &nbsp;&nbsp; &nbsp;&nbsp;
+                               </td>
+                               <td>
+                                   <button type="button" class="btn btn-info" @click="beginPre()">开始预测</button>
+                               </td>
+                           </tr>
+                       </table>
+                       <div class="modal fade" id="unknown" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                           <div class="modal-dialog">
+                               <div class="modal-content">
+                                   <div class="modal-header">
+                                       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                                           &times;
+                                       </button>
+                                       <h4 class="modal-title" >
+                                           导入待预测数据
+                                       </h4>
+
+                                   </div>
+                                   <div class="modal-body">
+                                       <input id="docFile" type="file" style="display: none" name="file" class="form-control" @change="mychange"/>
+                                       <table cellpadding="10">
+                                           <tr>
+                                               <td>
+                                                   <button type="button" class="btn btn-info" @click="mybrows">选择文件</button>
+                                               </td>
+                                               <td>
+                                                   &nbsp;&nbsp; &nbsp;&nbsp;
+                                               </td>
+                                               <td>
+                                                   <input id="filePath" type="text" class="form-control"  placeholder=".xls/.xlsx/.arff/.csv" style="height: 30px"/>
+                                               </td>
+                                           </tr>
+                                       </table>
+                                   </div>
+                                   <div class="modal-footer">
+                                       <button type="button" class="btn btn-info" data-dismiss="modal" @click="mysubmit()">
+                                           确定
+                                       </button>
+                                   </div>
+                               </div><!-- /.modal-content -->
+                           </div><!-- /.modal -->
+                       </div>
+                   </div>
+                   <br>
+                   <div style="background-color: rgba(201, 206, 212, 0.46);border-radius: 6px 6px 6px 6px">
+                       <label>预测结果：</label>
+                       <table>
+                           <tr>
+                               <td>
+                                   <button type="button" class="btn btn-info" id="Result" @click="ShowResult()">查看结果</button>
+                               </td>
+                           </tr>
+                       </table>
+                   </div>
+                   <br>
+               </div>
+
+                <!--右边（结果展示）-->
+                <div  class="col-md-8 column" style="background-color: rgba(139, 192, 194, 0.37)"  id="right" >
+                   <div>
+                       <table id="j48">
+                           <tr>
+                               <pre>
+                              {{j48Result.summaryString}}
+                               </pre>
+                           </tr>
+                           <tr>
+                               <pre>
+                               {{j48Result.matrixString}}
+                                    </pre>
+                           </tr>
+                           <tr>
+                                <pre>
+                               {{j48Result.classDetailsString}}
+                                     </pre>
+                           </tr>
+                           <tr>
+                               <pre>
+                               {{j48Result.classify}}
+                                     </pre>
+                           </tr>
+                       </table>
+                   </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function(){
+        document.getElementById("j48").style.display="none";
+        $("#Result").attr('disabled',true);
+
+        var vu=new Vue({
+            el:'#app',
+            data:{
+                m_ClassIndex:"",
+                m_BatchSize:100,
+                m_ConfidenceFactor:0.25,
+                m_MinNumObj:2,
+                m_NumDecimalPlaces:2,
+                m_NumFolds:3,
+                j48Result:"",
+    },
+            mounted:function(){
+
+            },
+            methods:{
+                mysubmit:function(){
+                    // alert("提交文件")
+                    var that=this;
+                    if(lg==0){
+                        alert("抱歉，您还没有选择文件！")
+                        return;
+                    }
+                    $.ajaxFileUpload({
+                        //文件上传接口
+                        url : '/classify/uploadPrefile',
+                        secureuri : false,
+                        fileElementId : 'docFile',
+                        dataType: 'json',   //服务器返回的数据类型。可以为xml,script,json,html。如果不填写，jQuery会自动判断。
+                        async : true,   //是否是异步
+                        //成功回调
+                        success:function(data) {
+                            //第一步：进度条更新
+                        },
+                        error:function(data, status, e) {
+                            alert("上传发生异常"+e);
+                        }
+                    })
+                },
+
+                //选择文件按钮（使用了代理模式）
+                mybrows:function () {
+                    $('#docFile').click();
+                },
+
+                mychange:function(){
+                    var fp = $("#docFile");
+                    lg = fp[0].files.length;
+
+                    var items = fp[0].files;
+                    var message=""
+                    if (lg > 0) {
+                        for (var i = 0; i < lg; i++) {
+                            var fileName = items[i].name; // get file name
+                            message=fileName
+                            var i = fileName.lastIndexOf(".");
+
+                            if(i > -1) {
+                                var ext = fileName.substring(i);
+                                if((ext==".csv")||(ext==".arff")||(ext==".xlsx")||(ext==".xls")){
+                                    $("#filePath").val(message)
+                                }else{
+                                    alert("选择的文件格式错误！")
+                                }
+                            }
+                        }
+                    }
+                },
+
+                //确定参数按钮
+                makeSureParams:function(){
+                    //存储参数
+                    this.m_ClassIndex=$("#classindex").val();
+                    this.m_BatchSize=$("#batchsize").val();
+                    this.m_ConfidenceFactor=$("#confidencefactor").val();
+                    this.m_MinNumObj=$("#minnumobj").val();
+                    this.m_NumDecimalPlaces=$("#numdecimalplaces").val();
+                    this.m_NumFolds=$("#numfolds").val();
+                },
+                StartTrain:function () {
+                    var that=this
+                    var url="";
+                    var folds=$("#folds").val();
+                    var choice=$('input[name="test"]:checked').val();
+                    console.log(choice)
+                    if(choice==1){
+                        //测试集验证
+                        url="/classify/testData"
+
+
+                    }else if(choice==2){
+                       // 交叉验证
+                        url="/classify/cross/"
+                        axios.get(url,{
+                            params:{
+                                folds:$("#folds").val(),
+                                m_BatchSize:that.m_BatchSize,
+                                m_ConfidenceFactor:that.m_ConfidenceFactor,
+                                m_MinNumObj:that.m_MinNumObj,
+                                m_NumDecimalPlaces:that.m_NumDecimalPlaces,
+                                m_NumFolds:that.m_NumFolds,
+                            }
+                        }).then(function(response){
+                            //document.getElementById("saveModel").style.display="block";
+                            //console.log(response.data)
+                            if(response.data.state==400){
+                                alert(response.data.error_messaege)
+                                return
+                            }
+                            that.j48Result=response.data
+                        },function (error) {
+                            console.log(error)
+                        })
+                    }
+                },
+//保存模型
+                SaveModel:function(){
+                    console.log("保存模型");
+                   var url="/classify/saveModel"
+                    my_download("J48",url);
+                },
+//开始预测
+                beginPre:function () {
+                    var url="/classify/prediction"
+                    axios.get(url).then(function (response) {
+                        if(response.data.state==400){
+                            alert(response.data.error_messaege)
+                            return
+                        }else{
+                            document.getElementById("j48").style.display="block";
+                            $("#Result").attr('disabled',false);
+                        }
+                        console.log(response.data);
+                    })
+                },
+
+//查看结果
+                ShowResult:function () {
+                    window.open("/html/show_result.html")
+                },
+
+//查看数据
+                dataChart:function(){
+                    window.open("/html/chart/first_chart.html")
+                },
+                input_file:function(){
+                    window.location.href="/html/input_file.html"
+                },
+                //属性预处理菜单
+                attribute_gen:function(){
+                    window.location.href="/html/attribute_gen.html"
+                },
+                instance_gen:function(){
+                    window.location.href="/html/instance_gen.html"
+                },
+
+                linerRegression_gen:function(){
+                    window.location.href="/html/classify.html"
+                },
+
+                randomForest_gen:function(){
+                    window.location.href="/html/mp5.html"
+                },
+                ik_par:function () {
+                    window.location.href="/html/ik_participle.html"
+                }
+            },
+            computed:{
+
+            }
+
+        })
+
+    });
+
+</script>
+
+</body>
+</html>

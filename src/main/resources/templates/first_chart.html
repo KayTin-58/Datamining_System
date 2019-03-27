@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>统计测试</title>
+    <link href="http://cdn.bootcss.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+    <script src="http://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+    <script src="http://cdn.bootcss.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://img.hcharts.cn/jquery/jquery-1.8.3.min.js"></script>
+    <script src="https://img.hcharts.cn/highcharts/highcharts.js"></script>
+    <script src="https://img.hcharts.cn/highcharts/modules/exporting.js"></script>
+    <script src="https://img.hcharts.cn/highcharts-plugins/highcharts-zh_CN.js"></script>
+    <script href="https://img.hcharts.cn/highcharts/themes/dark-unica.js"></script>
+</head>
+<body >
+<div id="app" class="container">
+
+    <div class="row clearfix">
+        <div id="container" style="min-width:400px;height:400px"></div>
+    </div>
+    <div class="row clearfix">
+        <div class="col-md-2 column">
+            <select class="form-control"  v-model="couponSelected" @change="get_info(couponSelected)">
+                <option v-for="opt in attribute_list">
+                    {{opt}}
+                </option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row clearfix">
+        <div id="binftu" style="min-width:400px;height:400px"></div>
+    </div>
+</div>
+<script>
+
+    $(document).ready(function(){
+        var vu=new Vue({
+            el:'#app',
+            data:{
+                oOptions:null,
+                attribute_list:[], //属性集合
+                series:[],
+                couponSelected:null
+            },
+            mounted:function(){
+                //获取属性值集合
+                var that=this;
+                that.get_attributeList();
+                that.my_chart();
+            },
+            methods:{
+                //初始化
+                my_chart:function () {
+                    var that=this
+                    that.oOptions = {
+                        chart: {
+                            renderTo: 'container',
+                            type: 'bar'
+                        },
+                        title: {
+                            text: '图表展示范例',
+                        },
+                        xAxis: {
+                            title: {
+                                text: '分类属性'
+                            },
+                            categories: ['YES','NO']
+                        },
+                        //y轴
+                        yAxis: {
+                            title: { text: 'Y 轴 标 题' },
+                        },
+                        legend: {
+                            reversed: true
+                        },
+                        plotOptions: {
+                            series: {
+                                stacking: 'normal'
+                            }
+                        },
+                        //数据列
+                        series: [{
+                            name:"属性01",
+                            data:[3,8]
+                        },
+                            {
+                                name:"属性02",
+                                data:[4,9]
+                            }]
+                    };
+
+                    var oChart = new Highcharts.Chart(that.oOptions);
+                    oChart.hideLoading();
+                },
+
+                //获取属性集合
+                get_attributeList:function () {
+                    var that=this;
+                    var url="/fileController/getAttributeList"
+                    axios.get(url).then(function (res) {
+                        that.attribute_list=res.data;
+                        that.couponSelected=res.data[0]
+                        that.get_info(that.couponSelected)
+                        console.log("属性集合信息："+this.attribute_list.length)
+                    })
+                },
+
+                //根据所选择的属性集合获取统计信息
+                get_info:function (name) {
+                    console.log("name"+name)
+                    var that=this
+                    var url="/fileController/getInfo"
+                    axios.get(url,{
+                        params:{
+                            name:name
+                        }
+                    }).then(function (res) {
+                        var data=res.data.seriesArrayList;
+                        that.oOptions.xAxis.categories=res.data.categories;
+                        that.oOptions.series=[]
+                       for(var i=0;i<data.length;i++){
+                           that.oOptions.series[i]=data[i]
+                       }
+                        var oChart = new Highcharts.Chart(that.oOptions);
+                        oChart.hideLoading();
+                        that.bingtu_init(res.data.bt_seriesArrayList)
+                    })
+                },
+                bingtu_init:function (data) {
+                    console.log("bingtu数据："+data)
+                    var chart = {
+                        plotBackgroundColor: null,
+                        plotBorderWidth: null,
+                        plotShadow: false
+                    };
+                    var title = {
+                        text: '属性值占比'
+                    };
+                    var tooltip = {
+                        pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                    };
+                    var plotOptions = {
+                        pie: {
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            dataLabels: {
+                                enabled: true,
+                                format: '<b>{point.name}%</b>: {point.percentage:.1f} %',
+                                style: {
+                                    color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                                }
+                            }
+                        }
+                    };
+                    var series = [{
+                        type: 'pie',
+                        name: 'Browser share',
+                        data: data
+                    }];
+                    var json = {};
+                    json.chart = chart;
+                    json.title = title;
+                    json.tooltip = tooltip;
+                    json.series = series;
+                    json.plotOptions = plotOptions;
+                    $('#binftu').highcharts(json);
+                }
+            },
+
+
+
+            computed:{
+
+            }
+
+        })
+
+    });
+</script>
+
+</body>
+</html>
+
+
+

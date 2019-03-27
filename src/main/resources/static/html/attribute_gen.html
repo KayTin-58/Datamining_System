@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="http://cdn.bootcss.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+    <script src="http://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+    <script src="http://cdn.bootcss.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="/js/ajaxfileupload.js"></script>
+    <style>
+        #test,#test1{min-height:250px;overflow-y:auto;max-height:300px;}
+        #main-nav,#filters {
+            margin-left: 1px;
+        }
+        #main-nav.nav-tabs.nav-stacked > li > a {
+            padding: 10px 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #4A515B;
+            background: #E9E9E9;
+            background: -moz-linear-gradient(top, #FAFAFA 0%, #E9E9E9 100%);
+            background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#FAFAFA), color-stop(100%,#E9E9E9));
+            background: -webkit-linear-gradient(top, #FAFAFA 0%,#E9E9E9 100%);
+            background: -o-linear-gradient(top, #FAFAFA 0%,#E9E9E9 100%);
+            background: -ms-linear-gradient(top, #FAFAFA 0%,#E9E9E9 100%);
+            background: linear-gradient(top, #FAFAFA 0%,#E9E9E9 100%);
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FAFAFA', endColorstr='#E9E9E9');
+            -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#FAFAFA', endColorstr='#E9E9E9')";
+            border: 1px solid #D5D5D5;
+            border-radius: 4px;
+        }
+        #main-nav.nav-tabs.nav-stacked > li > a > span {
+            color: #4A515B;
+        }
+        #main-nav.nav-tabs.nav-stacked > li.active > a, #main-nav.nav-tabs.nav-stacked > li > a:hover {
+            color: #FFF;
+            background: #3C4049;
+            background: -moz-linear-gradient(top, #4A515B 0%, #3C4049 100%);
+            background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#4A515B), color-stop(100%,#3C4049));
+            background: -webkit-linear-gradient(top, #4A515B 0%,#3C4049 100%);
+            background: -o-linear-gradient(top, #4A515B 0%,#3C4049 100%);
+            background: -ms-linear-gradient(top, #4A515B 0%,#3C4049 100%);
+            background: linear-gradient(top, #4A515B 0%,#3C4049 100%);
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#4A515B', endColorstr='#3C4049');
+            -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#4A515B', endColorstr='#3C4049')";
+            border-color: #2B2E33;
+        }
+        #main-nav.nav-tabs.nav-stacked > li.active > a, #main-nav.nav-tabs.nav-stacked > li > a:hover > span {
+            color: #FFF;
+        }
+        #main-nav.nav-tabs.nav-stacked > li {
+            margin-bottom: 4px;
+        }
+        /*定义二级菜单样式*/
+        .secondmenu a {
+            font-size: 10px;
+            color: #4A515B;
+            text-align: center;
+        }
+        .navbar-static-top {
+            background-color: #212121;
+            margin-bottom: 5px;
+        }
+        .navbar-brand {
+            background: url('') no-repeat 10px 8px;
+            display: inline-block;
+            vertical-align: middle;
+            padding-left: 50px;
+            color: #fff;
+        }
+    </style>
+    <title>属性预处理</title>
+</head>
+<body>
+<div  id="app" class="container">
+
+    <!--第一行 系统logo-->
+    <div class="row clearfix">
+        <div class="col-md-4 column">
+        </div>
+        <div class="col-md-4 column">
+            <h1>医疗数据挖掘平台</h1>
+        </div>
+        <div class="col-md-4 column">
+        </div>
+    </div>
+    <br/>
+    <div class="row clearfix">
+        <!--左侧菜单-->
+        <div id="tree" class="col-md-2 column">
+            <!--左侧树形菜单-->
+            <ul id="main-nav" class="nav nav-tabs nav-stacked" style="">
+                <li class="active">
+                    <a href="#">
+                        <i class="glyphicon glyphicon-th-large"></i>
+                        首页
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#" @click="input_file()">
+                        <i class="glyphicon glyphicon-credit-card"></i>
+                        导入数据
+                    </a>
+                </li>
+
+                <li >
+                    <a href="#systemSetting" class="nav-header collapsed" data-toggle="collapse">
+                        <i class="glyphicon glyphicon-cog"></i>
+                        数据预处理
+                        <span class="pull-right glyphicon glyphicon-chevron-down"></span>
+                    </a>
+                    <ul id="systemSetting" class="nav nav-list collapse secondmenu" style="height: 0px;">
+                        <li><a href="#" @click="attribute_gen()"><i class="glyphicon glyphicon-user" ></i>属性预处理</a></li>
+                        <li><a href="#" @click="instance_gen()"><i class="glyphicon glyphicon-th-list"></i>实例预处理</a></li>
+                    </ul>
+                </li>
+
+                <li >
+                    <a href="#classify" class="nav-header collapsed" data-toggle="collapse">
+                        <i class="glyphicon glyphicon-cog"></i>
+                        分类分析
+                        <span class="pull-right glyphicon glyphicon-chevron-down"></span>
+                    </a>
+                    <ul id="classify" class="nav nav-list collapse secondmenu" style="height: 0px;">
+                        <li><a href="#" @click="linerRegression_gen()"><i class="glyphicon glyphicon-user" ></i>决策树算法/J48</a></li>
+                        <li><a href="#" @click="randomForest_gen()"><i class="glyphicon glyphicon-th-list"></i>线性回归/M5P</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="./grid.html">
+                        <i class="glyphicon glyphicon-globe"></i>
+                        回归分析
+                    </a>
+                </li>
+                <li>
+                    <a href="./charts.html">
+                        <i class="glyphicon glyphicon-calendar"></i>
+                        关联规则分析
+                    </a>
+                </li>
+                <li>
+                    <a  @click="ik_par()">
+                        <i class="glyphicon glyphicon-calendar"></i>
+                        文本分词
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="glyphicon glyphicon-fire"></i>
+                        关于系统
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <!--右侧内容显示模块-->
+        <div class="col-md-10 column" style="background-color: rgba(213, 215, 218, 0.42)">
+<!--
+
+            &lt;!&ndash;第一层按钮区&ndash;&gt;
+            <div class="row clearfix">
+                <div class="col-md-2 column">
+                </div>
+                <div class="col-md-3 column">
+                    <button type="button" class="btn btn-primary" @click="Edit()">编辑数据</button>
+                </div>
+                <div class="col-md-2 column">
+                </div>
+                <div class="col-md-3 column">
+                    <a href="#" @click="Save">保存数据</a>
+                </div>
+            </div>
+            <br/><br/>-->
+                <!--第一行-->
+                <div class="row clearfix">
+                    <br>
+                    <div class="col-md-1 column">
+                    </div>
+                    <div class="col-md-2 column">
+                        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#myModal">
+                            选择过滤器
+                        </button>
+                    </div>
+                    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                                        &times;
+                                    </button>
+                                    <h4 class="modal-title" id="myModalLabel">
+                                        属性处理
+                                    </h4>
+                                </div>
+                                <div class="modal-body">
+                                    <!--核心编辑区-->
+                                    <ul id="filters" class="nav nav-tabs nav-stacked" style="">
+
+                                        <li >
+                                            <a href="#attribute_filter" class="nav-header collapsed" data-toggle="collapse">
+                                                <i class="glyphicon glyphicon-cog"></i>
+                                                选择处理器
+                                                <span class="pull-right glyphicon glyphicon-chevron-down"></span>
+                                            </a>
+                                            <ul id="attribute_filter" class="nav nav-list collapse secondmenu" style="height: 0px;">
+                                                <li><a href="#" @click="attribute_filter('normalize')">数值属性规范区间(默认(0,1])
+                                                    <label>Scale</label><input type="text" style="width: 40px" id="scale"/>
+                                                    <label>Translation</label><input type="text" style="width: 40px" id="translation"/>
+                                                </a></li>
+                                                <li><a href="#" @click="attribute_filter('nom2bin')">多元属性转二元属性</a></li>
+                                                <li><a href="#" @click="attribute_filter('string2nom')">字符串转标称型</a></li>
+                                                <li><a href="#" @click="attribute_filter('replaceMissingvalue')">填补空缺值</a></li>
+                                                <li><a href="#" @click="attribute_filter('discretize')">二元无监督离散化</a></li>
+                                                <li><a href="#" @click="attribute_filter('num2nom')">数值型转标称型</a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal" @click="choose_filter()">确定
+                                    </button>
+                                </div>
+                            </div><!-- /.modal-content -->
+                        </div><!-- /.modal -->
+                    </div>
+                    <div class="col-md-2 column">
+                        <input id="filePath" type="text" class="form-control" placeholder="过滤器名称" v-model="filter" style="height:33px;width:120px" readonly="true"/>
+                    </div>
+                    <div class="col-md-3 column">
+                        <button type="button" class="btn btn-info" @click="Edit()">查看数据</button>
+                    </div>
+                    <div class="col-md-3 column">
+                        <button type="button" class="btn btn-info" @click="Save">保存数据</button>
+                    </div>
+                    <br>
+                </div>
+               <!-- <div class="col-md-1 column">
+                </div>-->
+              <!--  <div class="col-md-1 column">
+                    <button type="button" class="btn btn-info" data-toggle="modal" data-target="#myModal">
+                        选择过滤器
+                    </button>
+                 </div>-->
+                <!-- 模态框（Modal） -->
+              <!--  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                                    &times;
+                                </button>
+                                <h4 class="modal-title" id="myModalLabel">
+                                  属性处理
+                                </h4>
+                            </div>
+                            <div class="modal-body">
+                                &lt;!&ndash;核心编辑区&ndash;&gt;
+                                <ul id="filters" class="nav nav-tabs nav-stacked" style="">
+
+                                    <li >
+                                        <a href="#attribute_filter" class="nav-header collapsed" data-toggle="collapse">
+                                            <i class="glyphicon glyphicon-cog"></i>
+                                            选择处理器
+                                            <span class="pull-right glyphicon glyphicon-chevron-down"></span>
+                                        </a>
+                                        <ul id="attribute_filter" class="nav nav-list collapse secondmenu" style="height: 0px;">
+                                            <li><a href="#" @click="attribute_filter('normalize')">数值属性规范区间(默认(0,1])
+                                                <label>Scale</label><input type="text" style="width: 40px" id="scale"/>
+                                                <label>Translation</label><input type="text" style="width: 40px" id="translation"/>
+                                            </a></li>
+                                            <li><a href="#" @click="attribute_filter('nom2bin')">多元属性转二元属性</a></li>
+                                            <li><a href="#" @click="attribute_filter('string2nom')">字符串转标称型</a></li>
+                                            <li><a href="#" @click="attribute_filter('replaceMissingvalue')">填补空缺值</a></li>
+                                            <li><a href="#" @click="attribute_filter('discretize')">二元无监督离散化</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal" @click="choose_filter()">确定
+                                </button>
+                            </div>
+                        </div>&lt;!&ndash; /.modal-content &ndash;&gt;
+                    </div>&lt;!&ndash; /.modal &ndash;&gt;
+                  </div>-->
+               <!-- <div class="col-md-1 column">
+
+                </div>-->
+               <!-- <div class="col-md-4 column">
+                    <input id="filePath" type="text" class="form-control"  v-model="filter" style="height: 30px" readonly="true"/>
+                </div>-->
+               <!-- <div class="col-md-2 column">
+                    <button id="submit" type="button" class="btn btn-info" >应用</button>
+                </div>-->
+                <br/>
+                <!--第er行-->
+            <div class="row clearfix" style="background-color: rgba(143, 143, 143, 0.22);border-radius: 10px 10px 10px 10px">
+                <br/>
+                <div class="col-md-4">
+                    <label>文件名：</label> &nbsp; &nbsp;
+                    <label style="color: #942a25">{{instancesEntityFirst.file_name}}</label>
+                </div>
+                <div class="col-md-2">
+                    <label>属性数：</label> &nbsp; &nbsp;
+                    <label style="color: #942a25">{{instancesEntityFirst.attributes_size}}</label>
+                </div>
+                <div class="col-md-2">
+                    <label>实例数：</label> &nbsp; &nbsp;
+                    <label style="color: #942a25">{{instancesEntityFirst.instance_size}}</label>
+                </div>
+                <br/>
+            </div>
+                <!--第三行-->
+            <div class="row clearfix" >
+                <br/>
+                <div class="col-md-3" id="test">
+                    <table class="table table-hover">
+                        <tr>
+                            <td align="left">
+                                <input type="checkbox" @click="selectAll()"/>
+                            </td>
+                            <td align="center">
+                                &nbsp; &nbsp;&nbsp;<label style="color: #0480be">&nbsp;&nbsp;列名</label>
+                            </td>
+                        </tr>
+
+                        <tr  v-for="(item,index) in attribute_list " @click="trclick(item,index)">
+                            <td align="left">
+                                <input type="checkbox" v-bind:checked="item.checked" @click="myselect(item)"/>
+                            </td>
+                            <td align="center">
+                                &nbsp;&nbsp;<label>&nbsp;{{index+1}}&nbsp;{{item.atttribuy_name}}</label>
+                            </td>
+                        </tr>
+                    </table>
+                    &nbsp;&nbsp; &nbsp;&nbsp;<button type="button" class="btn btn-danger" @click="Remove()">删除</button>
+                </div>
+
+                <div class="col-md-9" style="background-color: #d9edf7">
+                    <div class="row clearfix">
+                        <label>&nbsp;&nbsp;列名：</label>
+                        <label  style="color: #169426">{{result.attribute_Name}}</label>
+                        &nbsp;&nbsp; &nbsp;&nbsp;
+                        <label>数据类型：</label>
+                        <label  style="color: #091994"> {{result.num_type}}</label>
+                        &nbsp;&nbsp; &nbsp;&nbsp;
+                        <label>缺失率：</label>
+                        <label  style="color: #94170d">{{result.missing}}({{result.missing_percentage}})</label>
+                        &nbsp;&nbsp; &nbsp;&nbsp;
+                        <label>属性值数量：</label>
+                        <label  style="color: #309468"> {{result.distinct}} </label>
+                        &nbsp;&nbsp; &nbsp;&nbsp;
+                        <label>独享属性值数量：</label>
+                        <label  style="color: #940c85"> {{result.unique}} </label>
+                    </div>
+                    <div class="row clearfix" id="test1">
+                        <table class="table table-striped" id="StrOrNom" >
+                            <thead>
+                            <tr>
+                                <th>&nbsp;&nbsp; &nbsp;&nbsp;</th>
+                                <th>&nbsp;&nbsp; &nbsp;Name&nbsp;&nbsp; </th>
+                                <th>&nbsp;&nbsp; &nbsp;Counter&nbsp;&nbsp; </th>
+                                <th>&nbsp;&nbsp; &nbsp;Weight&nbsp;&nbsp; </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr  v-for="(item,index) in result.list">
+                                <th align="center">&nbsp;&nbsp; {{index}}&nbsp;&nbsp;</th>
+                                <th align="center">&nbsp;&nbsp; &nbsp;{{item.lable}}&nbsp;&nbsp; </th>
+                                <th align="center">&nbsp;&nbsp; &nbsp;{{item.count}}&nbsp;&nbsp; </th>
+                                <th align="center">&nbsp;&nbsp; &nbsp;{{item.weight}}&nbsp;&nbsp; </th>
+                                <th v-for="el in item.statistics_value_list" align="center">&nbsp;&nbsp; &nbsp;{{el}}&nbsp;&nbsp;</th>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                        <table class="table table-striped" id="Numeric">
+                            <thead>
+                            <tr>
+                                <th>&nbsp;&nbsp; &nbsp;</th>
+                                <th>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;统计信息&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;</th>
+                                <th>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;统计值&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>&nbsp;&nbsp; &nbsp;1&nbsp;&nbsp; &nbsp;</td>
+                                <td>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;MaxValue&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;</td>
+                                <td>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;{{result.maxValue}}&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;&nbsp; &nbsp;2&nbsp;&nbsp; &nbsp;</td>
+                                <td>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;MinValue&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;</td>
+                                <td>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;{{result.minValue}}&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;&nbsp; &nbsp;3</td>
+                                <td>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;Mean&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;</td>
+                                <td>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;{{result.mean}}&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;&nbsp; &nbsp;4</td>
+                                <td>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;StdDev&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;</td>
+                                <td>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;{{result.stdDev}}&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <br>
+            </div>
+    </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function(){
+        document.getElementById("Numeric").style.display="none";
+        document.getElementById("StrOrNom").style.display="none";
+        var vu=new Vue({
+            el:'#app',
+            data:{
+                lg:0,
+                mystate:0,
+                instancesEntityFirst:"",
+                checkAll:false,
+                attribute_list:[],
+                result:"",//点击单个属性时的返回结果
+                remove_list:[],
+                filter:''
+            },
+            mounted:function(){
+               this.initialization()
+            },
+            methods:{
+
+                trclick:function(item,index){
+                    var that=this;
+                    var url="/fileController/attributeAnalysis_nom0rStr"
+                    var attributeType=item.attribute_type
+                    //判断选择的属性的属性类型  然后选择不同的接口
+                    if(attributeType=="Nominal"||attributeType=="String"){
+                        //
+                        document.getElementById("StrOrNom").style.display="block";
+                        document.getElementById("Numeric").style.display="none";
+
+                    }else if(attributeType=="Numeric"||attributeType=="Date"){
+                        url="/fileController/attributeAnalysis_num"
+                        document.getElementById("StrOrNom").style.display="none";
+                        document.getElementById("Numeric").style.display="block";
+                    }
+
+                    //属性分析请求
+                    axios.get(url,{
+                        params: {
+                            attributeName:item.atttribuy_name,
+                            index:index
+                        }
+                    }).then(function(response){
+                        if(response.data.state==400){
+                            alert(response.data.error_messaege)
+                            return
+                        }
+                        that.result=response.data
+
+                    },function(errormessage){
+
+                    })
+                },
+
+                myselect:function(item){
+                    if(typeof item.checked == "undefined"){
+                        this.$set(item ,"checked",true)
+                    }else{
+                        item.checked = !item.checked;
+                    }
+                },
+
+                selectAll:function(){
+                    var _this=this;
+                    var isCheck=_this.checkAll;
+                    _this.attribute_list.forEach(function(item){
+                        if(typeof item.checked == "undefined"){
+                            _this.$set(item,"checked",!isCheck);
+                        }else{
+                            item.checked = !isCheck;
+                        }
+
+                        _this.checkAll=!isCheck;
+                    })
+
+
+                },
+
+//删除操作
+                Remove:function(){
+                    var that=this;
+                    var counter=0;
+                    //第一步：获取被选中的目标集合
+                    that.attribute_list.forEach(function(item){
+                        if(!(typeof item.checked == "undefined")){
+                            if(item.checked==true){
+                                alert(item.atttribuy_name)
+                                that.remove_list.push(counter)
+                            }
+                        }
+                        counter++;
+                    });
+                    //第二步：调用后台接口删除数据
+                    var url="/fileController/attribute_remove"
+                    // alert("删除动作调用")
+                    $.ajax({
+                        type : "get",
+                        url : url,
+                        data :{
+                            remove_list:that.remove_list,
+                            file_name:that.instancesEntityFirst.file_name},
+                        success : function(response) {
+                            if(response.state==400){
+                                alert(response.error_message)
+                                return
+                            }
+                            that.remove_list=[]
+                            that.instancesEntityFirst=response,
+                                    that.attribute_list=response.attribute_list
+                        },
+                        error : function(e) {
+                            alert('Error: ' + e);
+                        }
+                    });
+                },
+//编辑数据
+                Edit:function(){
+                    //发送请求跳转到新的页面
+                    window.open("/html/edit_page.html")
+                },
+//保存数据
+                Save:function(){
+                    alert("保存文件")
+                    //保存文件
+                    var url="/fileController/file_save"
+                    var form=$("<form>");//定义一个form表单
+                    form.attr("style","display:none");
+                    form.attr("target","");
+                    form.attr("method","post");
+                    form.attr("action",url);
+                    var fileInput=$("<input>");
+                    fileInput.attr("type","hidden");
+                    fileInput.attr("id","fileName");//设置属性的名字
+                    fileInput.attr("name","fileName");//设置属性的名字
+                    fileInput.attr("value",this.instancesEntityFirst.file_name);//设置属性的值
+                    $("body").append(form);//将表单放置在web中
+                    form.append(fileInput);
+                    form.submit();//表单提交
+                    //form.remove();
+                },
+//数据初始化加载
+                initialization:function(){
+                    var that=this
+                    var url='/fileController/initData'
+                    axios.get(url).then(function(response){
+                        that.instancesEntityFirst=response.data,
+                                that.attribute_list=response.data.attribute_list
+                        console.log(that.response);
+                    },function(erreo){
+
+                    })
+
+                },
+
+
+
+//属性过滤器菜单
+                attribute_filter:function(item){
+                    this.filter=item;
+                    console.log(item)
+                },
+                choose_filter:function(){
+                    var that=this
+                    if(that.filter==null){
+                        return
+                    }
+                    //第一步：更新显示框
+                    //第二步：调用后台接口
+
+                    var url='/fileController/attribute_filter'
+
+                    axios.get(url,{
+                        params:{
+                            filter_name:that.filter,
+                            scale:$("#scale").val(),
+                            translation:$("#translation").val()
+                        }
+                    }).then(function(response){
+                        //如果请求成功则更新数据
+                        if(response.data.state==400){
+                            //表示出现错误
+                            alert(response.data.error_messaege)
+                        }else{
+                            //接口正常更新数据
+                            that.instancesEntityFirst=response.data,
+                                    that.attribute_list=response.data.attribute_list
+                            console.log(that.response);
+                        }
+                    },function(error){
+                        //出现异常
+                       alert(error)
+                    })
+                },
+
+                //菜单按钮组
+                input_file:function(){
+                    window.location.href="/html/input_file.html"
+                },
+                //属性预处理菜单
+                attribute_gen:function(){
+                    alert("数字型预处理")
+                    window.location.href="/html/attribute_gen.html"
+                },
+                //数据集预处理菜单
+                instance_gen:function(){
+                    window.location.href="/html/instance_gen.html"
+                },
+
+                linerRegression_gen:function(){
+                    window.location.href="/html/classify.html"
+                },
+
+                randomForest_gen:function(){
+                    window.location.href="/html/mp5.html"
+                },
+                ik_par:function () {
+                    window.location.href="/html/ik_participle.html"
+                }
+            },
+            computed:{
+                /*    //请求成功
+                 mystate:function () {
+                 that=this;
+                 axios.get('/fileUpload/analy').then(function(response){
+                 console.log(response.data);
+                 that.dataInfo=response.data;
+                 },function(errormessage){
+                 alert(errormessage)
+                 })
+                 }*/
+            }
+        });
+    });
+
+</script>
+</body>
+</html>

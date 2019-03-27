@@ -1,0 +1,17 @@
+function save(url) {
+    //保存文件
+    var url=url
+    var form=$("<form>");//定义一个form表单
+    form.attr("style","display:none");
+    form.attr("target","");
+    form.attr("method","post");
+    form.attr("action",url);
+    var fileInput=$("<input>");
+    fileInput.attr("type","hidden");
+    fileInput.attr("id","fileName");//设置属性的名字
+    fileInput.attr("name","fileName");//设置属性的名字
+    fileInput.attr("value",this.instancesEntityFirst.file_name);//设置属性的值
+    $("body").append(form);//将表单放置在web中
+    form.append(fileInput);
+    form.submit();//表单提交
+}

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="http://cdn.bootcss.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+    <script src="http://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+    <script src="http://cdn.bootcss.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <title>查看预测结果</title>
+
+    <style>
+        #mytable{overflow:scroll }
+    </style>
+</head>
+<body>
+<div class="container" id="edit_page">
+    <br/><br/>
+    <div class="row clearfix">
+        <div class="col-md-12 column" id="mytable">
+            <div class="row clearfix">
+                <label>搜索</label>
+            </div>
+            <table class="table table-bordered" align="center">
+                <caption><h1>数据详情</h1></caption>
+                <thead >
+                <tr>
+                    <!-循环显示属性值和数据类型-->
+                    <th >缺失率（）</th>
+                    <th v-for="item in attribute_list" >{{item.atttribuy_name}}({{item.attribute_type}})</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                <!--显示具体实例e数据-->
+                <tr v-for="item in instance_list">
+                    <td v-for="attribute_value in item">{{attribute_value}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row clearfix">
+        <div class="col-md-5 column">
+        </div>
+        <div class="col-md-2 column">
+            <!--<button class="btn btn-primary" @click="downResult()">保存结果</button>-->
+        </div>
+        <div class="col-md-5 column">
+            <button class="btn btn-primary" @click="downResult()">保存结果</button>
+            <button @click="pageBack">-</button>
+            <input v-model="this_page" style="width: 25px" readonly="true">
+            <button @click="pageGo">+</button>
+            <label>总页数：{{page_total}}</label>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    $(document).ready(function(){
+        //初始化的时候发送请求
+        var vu=new Vue({
+            el:'#edit_page',
+            data:{
+                table_dataSet:"",
+                attribute_list:[],
+                instance_list:[],
+                this_page:1,
+                page_total:''
+
+            },
+            mounted:function(){
+                //第一步：获取数据
+                this.init_data();
+            },
+            methods:{
+                init_data:function(){
+                    var that=this;
+                    var url="/classify/showResult"
+                    axios.get(url,{
+                        params:{
+                            page:that.this_page
+                        }
+                    }).then(function(response){
+                        that.table_dataSet=response.data.editTable_dataSet;
+
+                        if(that.table_dataSet.state==400){
+                            alert(that.table_dataSet.error_messaege)
+                            return
+                        }
+
+                        that.page_total=response.data.totalPage;//总页数
+                        //拿取属性名称集合
+                        that.attribute_list= that.table_dataSet.attributeName_list;
+                        //拿取数据集 list
+                        that.instance_list= that.table_dataSet.attributeValue_list;
+                        //console.log("实例数据集："+response.data.attributeValue_list)
+
+                    },function(error){
+
+                    })
+                },
+
+                //jian
+                pageBack:function () {
+                    this.this_page--
+                    if(this.this_page<1){
+                        alert("已经是第一页了")
+                        this.this_page=1
+                        return
+                    }
+                    this.init_data()
+                },
+                //jia
+                pageGo:function () {
+                    this.this_page++
+                    if(this.this_page>this.page_total){
+                        alert("已经是最后一页了")
+                        this.this_page=this.page_total
+                        return
+                    }
+                    this.init_data()
+                },
+//保存结果
+                downResult:function () {
+                    //保存文件
+                    var url="/classify/Savepreresulr"
+                    var form=$("<form>");//定义一个form表单
+                    form.attr("style","display:none");
+                    form.attr("target","");
+                    form.attr("method","post");
+                    form.attr("action",url);
+                    var fileInput=$("<input>");
+                    fileInput.attr("type","hidden");
+                    fileInput.attr("id","fileName");//设置属性的名字
+                    fileInput.attr("name","fileName");//设置属性的名字
+                    fileInput.attr("value",this.instancesEntityFirst.file_name);//设置属性的值
+                    $("body").append(form);//将表单放置在web中
+                    form.append(fileInput);
+                    form.submit();//表单提交
+                    //form.remove();
+                },
+            },
+            computed:{}
+        })
+    })
+</script>
+</html>
